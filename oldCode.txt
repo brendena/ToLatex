@@ -1,0 +1,24 @@
+results : String
+results =
+    let
+        phrase =
+            "\\int\\frac{d\\theta} {1+\\theta^2}= \\tan^{-1} \\theta+C"
+
+        --test2 =
+        --   split (AtMost 1) (regex "\\\\.*?(?=[\\W])") test
+        -- get the tag
+        function =
+            find (AtMost 1) (regex "\\\\.*?(?=[\\W])") phrase
+
+        --remove the tag string
+        removeFunctionString =
+            replace (AtMost 1) (regex "\\\\.*?(?=[\\W])") (\{ match } -> "") phrase
+
+        --_ =
+        --    log "number" (toString test2)
+        --e2 =
+        --    log "length " (length test2)
+    in
+        -- withDefault "" (head (drop 1 test2))
+        --withDefault "test" (head (List.map .match test2))
+        removeFunctionString
