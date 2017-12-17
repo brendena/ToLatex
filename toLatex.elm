@@ -11,6 +11,7 @@ import Maybe exposing (..)
 import Debug exposing (..)
 import Combine exposing (..)
 import Combine.Char exposing (..)
+import Combine.Num exposing (..)
 import Debug exposing (log)
 
 
@@ -69,13 +70,15 @@ view model =
 
 
 --(?<=\\).*?(?=[^a-z A-Z])
+{-
+   Expression -
+       Are things that are inside of {} or []
+-}
 
 
 type Expression
-    = EBool Bool
-    | EInt Int
+    = EInt Int
     | EFloat Float
-    | GHSymbols GreekHebrewLetters
     | EString String
     | EAdd Expression Expression
     | ESub Expression Expression
@@ -83,14 +86,13 @@ type Expression
     | EDiv Expression Expression
 
 
-type Statement
+type Statment
     = SExpr Expression
+    | GHSymbols GreekHebrewLetters
 
 
 type CompoundStatement
-    = CSimple (List Statement)
-    | CS2 (List Statement) (List Statement)
-    | CS3 (List Statement) (List Statement) (List Statement)
+    = CSimple (List Statment)
 
 
 type GreekHebrewLetters
@@ -136,7 +138,34 @@ type GreekHebrewLetters
     | GH_gimel
 
 
-greekAndHebrew : Parser s Expression
+int : Parser s Expression
+int =
+    EInt <$> Combine.Num.int <?> "Intiger"
+
+
+float : Parser s Expression
+float =
+    EFloat <$> Combine.Num.float <?> "Float"
+
+
+expr : Parser s Statment
+expr =
+    lazy <|
+        \() ->
+            let
+                stmt =
+                    choice
+                        [ int
+                        , float
+                        ]
+
+                mapped =
+                    SExpr <$> stmt
+            in
+                whitespace *> mapped <* whitespace
+
+
+greekAndHebrew : Parser s Statment
 greekAndHebrew =
     GHSymbols
         <$> choice
@@ -183,7 +212,7 @@ greekAndHebrew =
         <?> "not a greek letter"
 
 
-simpleStmt : Parser s Expression
+simpleStmt : Parser s Statment
 simpleStmt =
     lazy <|
         \() ->
@@ -193,16 +222,15 @@ simpleStmt =
                         [ greekAndHebrew
                         ]
             in
-                --SExpr <$> sepBy (string ";" <* whitespace) stmt <* (() <$ eol <|> end)
-                (whitespace <* (string "\\")) *> greekAndHebrew <* whitespace
+                (whitespace <* (string "\\")) *> stmt <* whitespace
 
 
-program : Parser s (List Expression)
+program : Parser s (List Statment)
 program =
-    many1 simpleStmt
+    many1 (choice [ simpleStmt, expr ])
 
 
-parse : String -> Result String (List Expression)
+parse : String -> Result String (List Statment)
 parse s =
     let
         test =
@@ -230,7 +258,7 @@ parse s =
                     Err <| formatError ms stream
 
 
-printExpressions : List Expression -> String
+printExpressions : List Statment -> String
 printExpressions ex =
     let
         test =
@@ -275,6 +303,6 @@ formatError ms stream =
 --- look into how the program does it Indentation.
 
 
-test : Result String (List Expression)
+test : Result String (List Statment)
 test =
-    parse """ \\theta \\beta """
+    parse """ 45 55 2  \\theta \\beta  334"""
