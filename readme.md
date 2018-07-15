@@ -16,6 +16,13 @@ http://package.elm-lang.org/packages/elm-community/parser-combinators/latest
 Another great example
 https://github.com/battermann/story-tinkler/blob/master/src/StoryParser.elm
 
+# new Techiques
+
+[elm-tools/parser](https://github.com/elm-tools/parser)
+
+Currently using elm-reactor to test program
+
+
 # Start
 
 elm-ractor
