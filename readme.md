@@ -30,3 +30,6 @@ elm-ractor
 
 # mathlatex synipots
 https://reu.dimacs.rutgers.edu/Symbols.pdf
+
+# Going to have to try this version of the [library](https://github.com/elm/parser)
+
